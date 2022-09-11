@@ -1,0 +1,10 @@
+apiVersion: stack.octopipe.io/v1alpha1
+kind: Resource
+metadata:
+  name: app-1
+spec:
+  category: APP
+  type: Generic
+
+
+  # TODO(user): Add fields here

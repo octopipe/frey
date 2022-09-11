@@ -1,0 +1,59 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - resources
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - resources/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - resources/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - stacks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - stacks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - stack.octopipe.io
+  resources:
+  - stacks/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,28 @@
+domain: octopipe.io
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: octopipe
+repo: github.com/octopipe/frey
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: octopipe.io
+  group: stack
+  kind: Stack
+  path: github.com/octopipe/frey/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: octopipe.io
+  group: stack
+  kind: Resource
+  path: github.com/octopipe/frey/api/v1alpha1
+  version: v1alpha1
+version: "3"
