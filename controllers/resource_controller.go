@@ -18,8 +18,9 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,6 +30,7 @@ import (
 	"github.com/argoproj/gitops-engine/pkg/engine"
 	"github.com/argoproj/gitops-engine/pkg/sync"
 	stackv1alpha1 "github.com/octopipe/frey/api/v1alpha1"
+	"github.com/octopipe/frey/templates/app"
 )
 
 // ResourceReconciler reconciles a Resource object
@@ -53,9 +55,22 @@ type ResourceReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *ResourceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	_, err := r.GitOpsEngine.Sync(context.Background(), []*unstructured.Unstructured{}, func(r *cache.Resource) bool {
+	logger.Info(fmt.Sprintf("SYNC RESOURCE %s START...", req.Name))
+	genericApp := app.GenericApp{
+		Name:         req.Name,
+		Image:        "nginx:1.14.2",
+		Port:         8080,
+		ResourceName: req.Name,
+	}
+	n, err := app.NewGenericApp(genericApp)
+	if err != nil {
+		logger.Error(err, "unable to create new generic app")
+		return ctrl.Result{}, err
+	}
+
+	_, err = r.GitOpsEngine.Sync(context.Background(), n, func(r *cache.Resource) bool {
 		return true
-	}, "0", req.Namespace, sync.WithPrune(true), sync.WithLogr(logger))
+	}, time.Now().String(), "default", sync.WithPrune(true), sync.WithLogr(logger))
 
 	if err != nil {
 		logger.Error(err, "failed to sync resource")

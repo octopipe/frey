@@ -24,6 +24,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -38,10 +39,18 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
+const (
+	annotationMark = "octopipe.io/mark"
+)
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 )
+
+type ResourceInfo struct {
+	annotationMark string
+}
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -68,8 +77,14 @@ func main() {
 	logger := zap.New(zap.UseFlagOptions(&opts))
 
 	clusterCache := cache.NewClusterCache(config,
-		cache.SetNamespaces([]string{"default"}),
+		cache.SetNamespaces([]string{}),
 		cache.SetLogr(logger),
+		cache.SetPopulateResourceInfoHandler(func(un *unstructured.Unstructured, isRoot bool) (info interface{}, cacheManifest bool) {
+			gcMark := un.GetAnnotations()[annotationMark]
+			info = &ResourceInfo{annotationMark: un.GetAnnotations()[annotationMark]}
+			cacheManifest = gcMark != ""
+			return
+		}),
 	)
 	gitOpsEngine := engine.NewEngine(config, clusterCache, engine.WithLogr(logger))
 
